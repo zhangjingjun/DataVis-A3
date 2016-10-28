@@ -1,8 +1,11 @@
 <title>Animated Transitions</title>
 	<link href="https://fonts.googleapis.com/css?family=Exo+2|Poiret+One" rel="stylesheet">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js"></script>
+	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js"></script>-->
+    <script src="https://d3js.org/d3-path.v1.min.js"></script>
+    <script src="https://d3js.org/d3-shape.v1.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
 
-	<style type="text/css">
+<style type="text/css">
 		body {
 			background-color: #f0f0f0;
       		color: #000000;
@@ -34,6 +37,7 @@
 </body>
 
 <script>
+
   	console.log(d3); // test if d3 is loaded
 
   	var svgWidth = 840;
@@ -53,7 +57,8 @@
   	var autoSetBarWidth = true;
   	var barWidth = 20;
   	var currentState = 0;
-
+    var yAxisBottom = chartHeight+margin.top-maxRadius
+	var transitionDelay = 20
   	d3.csv('fruit.csv', function(err, data) {
     	if(err) console.log(err);
     	// start here!
@@ -62,8 +67,13 @@
 		var rowNum = data.length;
 		var maxValue = 0;
 		var valueInterval = 5;
-		var colorSelecttion = {"Apple":"#008000", "Pear":"#004000", "Orange":"#FFA500", "Cherry":"#A00000", "Blueberry":"#00008B", "Banana":"#FFFF00", "Peach":"#FFC0CB", "Lemon":"#808040", "Watermelon":"#FF0000", "Lime":"#00FF00", "Mango":"#B8860B", "Grape":"#800080", "Kiwi":"#0000FF", "Pineapple":"#D2691E", "Date":"#600000"};
-		var colorList = ["#008000", "#004000", "#FFA500", "#A00000", "#00008B", "#FFFF00", "#FFC0CB", "#808040", "#FF0000", "#00FF00", "#B8860B", "#800080", "#0000FF", "#D2691E", "#600000"];
+		var colorSelecttion = {"Apple":"#008000", "Pear":"#004000", "Orange":"#FFA500", "Cherry":"#A00000",
+			"Blueberry":"#00008B", "Banana":"#FFFF00", "Peach":"#FFC0CB", "Lemon":"#808040",
+			"Watermelon":"#FF0000", "Lime":"#00FF00", "Mango":"#B8860B", "Grape":"#800080", "Kiwi":"#0000FF",
+			"Pineapple":"#D2691E", "Date":"#600000"};
+		var colorList = ["#008000", "#004000", "#FFA500", "#A00000", "#00008B",
+			"#FFFF00", "#FFC0CB", "#808040", "#FF0000", "#00FF00", "#B8860B", "#800080",
+			"#0000FF", "#D2691E", "#600000"];
 
 		for (i = 0; i < rowNum; i++){
 			for (j = 1; j < data.columns.length; j++) {
@@ -140,22 +150,43 @@
 		var polyPointList = pa + pb;
 		var areaPointList = pc + pd;
 		var zeroPointList = pe + pf;
-	
-		var svg = d3.select("div").append("svg").attr("width", svgWidth).attr("height", svgHeight);
+
+
+
+		var svg = d3.select("div")
+				.append("svg")
+				.attr("width", svgWidth)
+				.attr("height", svgHeight);
 
 		var gx = svg.append("g");
 		var gy = svg.append("g");
 
 		
-		gx.append("line").attr("x1", margin.left).attr("x2", margin.left).attr("y1", chartHeight+margin.top-maxRadius).attr("y2", margin.top).attr("stroke", wordColor).style("stroke-dasharray", ("10, 10"));
+		gx.append("line")
+				.attr("x1", margin.left)
+				.attr("x2", margin.left)
+				.attr("y1", chartHeight+margin.top-maxRadius)
+				.attr("y2", margin.top)
+				.attr("stroke", wordColor)
+				.style("stroke-dasharray", ("10, 10"));
 
 		for (i=0; i<rowNum; i++){
-			gx.append("text").attr("transform", "translate("+ (centerx[i]-5) +", "+ (chartHeight+margin.top-maxRadius+5) +")rotate(90)").attr("fill", "black").text(data[i].Fruit);
+			gx.append("text")
+					.attr("transform", "translate("+ (centerx[i]-5) +", "+ (chartHeight+margin.top-maxRadius+5) +")rotate(90)")
+					.attr("fill", "black")
+					.text(data[i].Fruit);
 		}
 		
 		for (i=ystart, j=0; i>0; i=i-yinterval, j++){
-			gy.append("line").attr("x1", margin.left).attr("x2", margin.left+chartWidth).attr("y1", i).attr("y2", i).attr("stroke", wordColor).style("stroke-dasharray", ("10, 10"));
-			gy.append("text").attr("transform", "translate(0, "+ i +")").attr("fill", wordColor).text(""+ 5*j).attr("font-size", 12);
+			gy.append("line")
+					.attr("x1", margin.left)
+					.attr("x2", margin.left+chartWidth)
+					.attr("y1", i).attr("y2", i)
+					.attr("stroke", wordColor).style("stroke-dasharray", ("10, 10"));
+			gy.append("text")
+					.attr("transform", "translate(0, "+ i +")")
+					.attr("fill", wordColor).text(""+ 5*j)
+					.attr("font-size", 12);
 		}
 		
 		var gbars = svg.append("g");
@@ -163,45 +194,273 @@
 		var glines = svg.append("g");
 		var gpoly = svg.append("g");
     	
-		//var circles = gcircles.selectAll("circle").data(data).enter().append("circle").attr("cx", function(d){a = xscale(findRowNum(d.Fruit)); return a; }).attr("cy", function(d){a = yscale(d.Count); return a;}).attr("r", function(d){return rscale(d.Count);}).attr("fill", function(d) { return colorSelecttion[d.Fruit];}).attr("opacity", opacityValue);
+		//var circles = gcircles.selectAll("circle")
+		// .data(data).enter().append("circle")
+		// .attr("cx", function(d){a = xscale(findRowNum(d.Fruit)); return a; })
+		// .attr("cy", function(d){a = yscale(d.Count); return a;})
+		// .attr("r", function(d){return rscale(d.Count);})
+		// .attr("fill", function(d) { return colorSelecttion[d.Fruit];})
+		// .attr("opacity", opacityValue);
 		
-		var bars = gbars.selectAll("rect").data(data).enter().append("rect").attr("class", "bp").attr("rx", 0).attr("ry", 0).attr("x", function(d){a = xscale(findRowNum(d.Fruit))-barWidth/2; return a; }).attr("y", function(d){a = yscale(d.Count); return a;}).attr("width", barWidth).attr("height", function(d){return hscale(d.Count);}).attr("fill", function(d) { return colorSelecttion[d.Fruit];}).attr("opacity", opacityValue);
-		//var lines = glines.selectAll("line").data(data).enter().append("line").attr("x1", centerx[0]).attr("x2",centerx[0]).attr("y1", centery[0]).attr("y2", centery[0]).attr("stroke", backColor).attr("opacity", 0);
-		var polys = gpoly.append("polygon").attr("class", "bp").attr("points", zeroPointList).attr("stroke", polyColor).attr("stroke-width", 0).attr("opacity", opacityValue);
+		var bars = gbars.selectAll("rect")
+				.data(data)
+				.enter()
+				.append("rect")
+				.attr("class", "bp")
+				.attr("rx", 0)
+				.attr("ry", 0)
+				.attr("x", function(d){a = xscale(findRowNum(d.Fruit))-barWidth/2; return a; })
+				.attr("y", function(d){a = yscale(d.Count); return a;})
+				.attr("width", barWidth)
+				.attr("height", function(d){return hscale(d.Count);})
+				.attr("fill", function(d) { return colorSelecttion[d.Fruit];})
+				.attr("opacity", opacityValue);
 
-		//var lines = glines.selectAll("line").data(data).enter().append("line").attr("x1", function(d){a = xscale(findRowNum(d.Fruit)); return findRowNum(d.Fruit)<(rowNum-1)?a:0; }).attr("x2",function(d){a = findRowNum(d.Fruit); return findRowNum(d.Fruit)<(rowNum-1)?centerx[a+1]:0;} ).attr("y1", function(d){a = yscale(d.Count); return findRowNum(d.Fruit)<(rowNum-1)?a:0;}).attr("y2", function(d){a = findRowNum(d.Fruit); return findRowNum(d.Fruit)<(rowNum-1)?centery[a+1]:0;} ).attr("stroke", function(d) { return colorSelecttion[d.Fruit];}).attr("stroke-width", 2);
+//		var lines = glines.selectAll("line")
+//		 .data(data).enter().append("line")
+//		 .attr("x1", centerx[0]).attr("x2",centerx[0])
+//		 .attr("y1", centery[0])
+//		 .attr("y2", centery[0]).attr("stroke", backColor)
+//		 .attr("opacity", 0);
+//		var line = d3.svg.line()
+//				.x(function(d){return xscale(findRowNum(d.Fruit))-barWidth/2;})
+//				.y(function(d){return yscale(d.Count);})
+//
+//		var path = svg.append('path')
+//				.attr('class', 'line')
+//				.attr('d', line(data));
+//		var lineFunction = svg.line()
+//
+//		                       .x(function(d) { return xscale(findRowNum(d.Fruit))-barWidth/2;})
+//		                       .y(function(d) { return yscale(d.Count);})
+//		                        .interpolate("linear");
+//		var path = svg.append("path")
+//				.attr("d", lineFunction)
+//				.attr("storke", "blue")
+//				.attr("storke-width", "2")
+//				.attr("fill", "blue");
+
+
+        var lineFunction = d3.line()
+				.curve(d3.curveMonotoneX)
+				.x(function(d){ console.log(xscale(findRowNum(d.Fruit))); return xscale(findRowNum(d.Fruit));})
+				.y(function(d){ console.log(yscale(d.Count)); return yAxisBottom;});
+
+		var newLineFunction = d3.line()
+				.curve(d3.curveMonotoneX)
+				.x(function(d){ console.log(xscale(findRowNum(d.Fruit))); return xscale(findRowNum(d.Fruit)) + 10;})
+				.y(function(d){ console.log(yscale(d.Count)); return yscale(d.Count) + 10});
+
+		var areaFunction = d3.area()
+				.curve(d3.curveMonotoneX)
+				.x(function(d, i){ console.log(xscale(findRowNum(d.Fruit))); return xscale(findRowNum(d.Fruit)) + 10;})
+				.y1(function(d, i){ console.log(yscale(d.Count)); return yscale(d.Count) + 10;})
+				.y0(yAxisBottom);
+
+//		var newAreaFunction = d3.area()
+//
+//				.x1(function(d, i){ console.log(xscale(findRowNum(d.Fruit))); return xscale(findRowNum(d.Fruit));})
+//				.x0(function(d, i){ console.log(xscale(findRowNum(d.Fruit))); return xscale(findRowNum(d.Fruit)) - barWidth/2;})
+//				.y1(function(d, i){ console.log(yscale(d.Count)); return yscale(d.Count)})
+//				.y0(yAxisBottom);
+
+		var newAreaFunction = d3.area()
+				.defined(lineFunction.defined())
+				.x(lineFunction.x)
+				.y1(lineFunction.y)
+				.y0(yAxisBottom);
+
+//		function pathTween() {
+//			var interpolate = d3.scale.quantile()
+//					.domain([margin.left+maxRadius, chartWidth+margin.left-maxRadius])
+//					.range(d3.range(1, data.length + 1));
+//			return function(t) {
+//				return line(data.slice(0, interpolate(t)));
+//			};
+//		}​
+
+		var zeroAreaFunction = d3.area()
+				.curve(d3.curveMonotoneX)
+				.x(function(d, i){ console.log(xscale(findRowNum(d.Fruit))); return xscale(findRowNum(d.Fruit));})
+				.y(yAxisBottom);
+
+
+		var lines = glines.selectAll("path")
+				.data(data)
+				.enter().append("path")
+				.attr('class','bp')
+				.attr('d', lineFunction(data))
+				.attr("stroke", "gray")
+				.attr("stroke-opacity", opacityValue)
+				.attr("stroke-width", "0")
+				.style("fill", "transparent")
+				.attr("opacity", opacityValue);
+
+
+
+//		var lines = glines.selectAll("line")
+//				.data(data)
+//				.enter()
+//				.append("line")
+//				.attr("class", "bp")
+//				.attr("x", function(d, i){ return centerx[i];})
+//				.attr("y", function(d, i){ return centery[i];})
+//				.attr("storke", "blue")
+//				.attr("storke-width", "2")
+//				.attr("fill", "blue");
+
+		var polys = gpoly
+				.append("polygon")
+				.attr("class", "bp")
+				.attr("points", zeroPointList)
+				.attr("stroke", polyColor)
+				.attr("stroke-width", 0)
+				.attr("opacity", opacityValue);
+
+		//var lines = glines.selectAll("line")
+		// .data(data).enter().append("line")
+		// .attr("x1", function(d){a = xscale(findRowNum(d.Fruit));return findRowNum(d.Fruit)<(rowNum-1)?a:0; })
+		// .attr("x2",function(d){a = findRowNum(d.Fruit); return findRowNum(d.Fruit)<(rowNum-1)?centerx[a+1]:0;} )
+		// .attr("y1", function(d){a = yscale(d.Count); return findRowNum(d.Fruit)<(rowNum-1)?a:0;})
+		// .attr("y2", function(d){a = findRowNum(d.Fruit); return findRowNum(d.Fruit)<(rowNum-1)?centery[a+1]:0;} )
+		// .attr("stroke", function(d) { return colorSelecttion[d.Fruit];}).attr("stroke-width", 2);
 
 		d3.selectAll(".bp").on("click", function(drect, i){ 
 			switch (currentState) {
+				// The bar chart to bubble chart
 				case 0:
-					d3.selectAll("rect").transition().attr("rx", function(d, i){ return rscale(d.Count);}).attr("ry", function(d, i){ return rscale(d.Count);}).attr("x", function(d, i){a = xscale(findRowNum(d.Fruit))-rscale(d.Count); return a; }).attr("y", function(d){a = yscale(d.Count)-rscale(d.Count); return a;}).attr("width", function(d, i){ return 2*rscale(d.Count);} ).attr("height", function(d, i){ return 2*rscale(d.Count);}).duration(transitionDuration); 
+					d3.selectAll("rect")
+							.transition()
+							.delay(function(d, i){return transitionDelay * i;})
+							.attr("rx", function(d, i){ return rscale(d.Count);})
+							.attr("ry", function(d, i){ return rscale(d.Count);})
+							.attr("x", function(d, i){a = xscale(findRowNum(d.Fruit))-rscale(d.Count); return a; })
+							.attr("y", function(d){a = yscale(d.Count)-rscale(d.Count); return a;})
+							.attr("width", function(d, i){ return 2*rscale(d.Count);} )
+							.attr("height", function(d, i){ return 2*rscale(d.Count);})
+							.duration(transitionDuration);
+
+
 					currentState++;
+					break;
+                // bubble chart to line chart
+				case 1:
+					d3.selectAll("rect")
+							.transition()
+							.delay(function(d, i){return transitionDelay * i;})
+							.attr("rx", function(d, i){ return rscale(d.Count);})
+							.attr("ry", function(d, i){ return rscale(d.Count);})
+							.attr("x", function(d, i){a = xscale(findRowNum(d.Fruit)); return a; })
+							.attr("y", function(d){a = yscale(d.Count); return a;})
+							.attr("width", 20)
+							.attr("height", 20)
+							.attr("fill", polyColor)
+							.duration(transitionDuration);
+
+//					d3.selectAll("line")
+//							.transition()
+//							.attr("x", function(d, i){ return xscale(findRowNum(d.Fruit))-barWidth/2;})
+//							.attr("y", function(d, i){ return yscale(d.Count);})
+//							.duration(transitionDuration)
+//							.attr("storke", "blue")
+//							.attr("storke-width", "10")
+//							.attr("fill", "blue");;
+                    d3.selectAll("path")
+							.transition()
+							.attr('d', newLineFunction(data))
+							.attr("stroke-width", 5)
+							.duration(transitionDuration)
+							.delay(transitionDuration);
+
+//					d3.selectAll("polygon")
+//							.transition()
+//							.attr("points", linePointList[0])
+//							.duration(transitionDuration);
+//					for (i=1; i<rowNum; i++) {
+//						d3.selectAll("polygon")
+//								.transition()
+//								.attr("points", linePointList[i])
+//								.attr("stroke-width", 6)
+//								.duration(transitionDuration);
+//					}
+					currentState += 2;
 					break;
 
-				case 1:
-					d3.selectAll("rect").transition().attr("rx", function(d, i){ return rscale(d.Count);}).attr("ry", function(d, i){ return rscale(d.Count);}).attr("x", function(d, i){a = xscale(findRowNum(d.Fruit))-5; return a; }).attr("y", function(d){a = yscale(d.Count)-5; return a;}).attr("width", 10).attr("height", 10).attr("fill", polyColor).duration(transitionDuration); 
-					//d3.selectAll("rect").transition().attr("rx", function(d, i){ return rscale(d.Count);}).attr("ry", function(d, i){ return rscale(d.Count);}).attr("x", centerx[0]).attr("y", centery[0]).attr("width", 0).attr("height", 0).duration(transitionDuration); 
-					d3.selectAll("polygon").transition().attr("points", linePointList[0]).duration(transitionDuration);
-					for (i=1; i<rowNum; i++) {
-						d3.selectAll("polygon").transition().attr("points", linePointList[i]).attr("stroke-width", 6).duration(transitionDuration).delay(i*transitionDuration);
-					}
-					currentState++;
-					break;
 				case 2:
-					d3.selectAll("rect").transition().attr("width", 0).attr("height", 0);
-					d3.selectAll("polygon").transition().attr("points", polyPointList).attr("stroke-width", 1).duration(transitionDuration);
+					d3.selectAll("path")
+							.transition()
+							.delay(function(d, i){return transitionDelay * i;})
+							.duration(transitionDuration);
+
+//					d3.selectAll("polygon")
+//							.transition()
+//							.attr("points", polyPointList)
+//							.attr("stroke-width", 1)
+//							.duration(transitionDuration);
 					currentState++;
 					break;
 
 				case 3:
-					d3.selectAll("polygon").transition().attr("points", areaPointList).duration(transitionDuration);
+
+					d3.selectAll("rect")
+							.transition()
+							.delay(function(d, i){return transitionDelay * i;})
+							.attr("rx", function(d, i){ return rscale(d.Count);})
+							.attr("ry", function(d, i){ return rscale(d.Count);})
+							.attr("x", function(d, i){a = xscale(findRowNum(d.Fruit)); return a + 10; })
+							.attr("y", function(d){a = yscale(d.Count); return a + 10;})
+							.attr("width", 0)
+							.attr("height", 0)
+							.duration(transitionDuration);
+
+					d3.selectAll("path")
+							.transition()
+							.attr('d', areaFunction(data))
+							.attr("stroke-width","0")
+							.style("fill","gray")
+							.attr("opacity",opacityValue)
+							.duration(transitionDuration)
+							.delay(transitionDuration);
+//					d3.selectAll("polygon")
+//							.transition()
+//							.attr("points", areaPointList)
+//							.duration(transitionDuration);
 					currentState++;
 					break;
 				case 4:
-					d3.selectAll("rect").transition().attr("rx", 0).attr("ry", 0).attr("x", function(d){a = xscale(findRowNum(d.Fruit))-barWidth/2; return a; }).attr("y", ystart).attr("width", 0).attr("height", 0).duration(transitionDuration); 
-					d3.selectAll("polygon").transition().attr("points", zeroPointList).attr("stroke-width", 0).duration(transitionDuration);
-					d3.selectAll("rect").transition().attr("rx", 0).attr("ry", 0).attr("x", function(d){a = xscale(findRowNum(d.Fruit))-barWidth/2; return a; }).attr("y", function(d){a = yscale(d.Count); return a;}).attr("width", barWidth).attr("height", function(d){return hscale(d.Count);}).duration(transitionDuration).delay(transitionDuration); 
-					d3.selectAll("rect").transition().attr("fill", function(d) { return colorSelecttion[d.Fruit];}).duration(transitionDuration).delay(transitionDuration*2); 
+					d3.selectAll("rect")
+							.transition()
+							.attr("rx", 0)
+							.attr("ry", 0)
+							.attr("x", function(d){a = xscale(findRowNum(d.Fruit))-barWidth/2; return a; })
+							.attr("y", ystart).attr("width", 0).attr("height", 0).duration(transitionDuration);
+
+					d3.selectAll("path")
+							.transition()
+							.attr('d', zeroAreaFunction(data))
+							.style("fill","transparent")
+							.attr("stroke-width","0")
+							.duration(transitionDuration);
+
+//					d3.selectAll("polygon")
+//							.transition()
+//							.attr("points", zeroPointList)
+//							.attr("stroke-width", 0).duration(transitionDuration);
+					d3.selectAll("rect")
+							.transition()
+							.attr("rx", 0)
+							.attr("ry", 0)
+							.attr("x", function(d){a = xscale(findRowNum(d.Fruit))-barWidth/2; return a; })
+							.attr("y", function(d){a = yscale(d.Count); return a;})
+							.attr("width", barWidth)
+							.attr("height", function(d){return hscale(d.Count);})
+							.duration(transitionDuration)
+							.delay(transitionDuration);
+					d3.selectAll("rect")
+							.transition()
+							.attr("fill", function(d) { return colorSelecttion[d.Fruit];})
+							.duration(transitionDuration)
+							.delay(transitionDuration*2);
 					currentState = 0;
 					break;
 				default:
